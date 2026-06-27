@@ -38,42 +38,34 @@ export default function WeekPlanning() {
   const weekParam = getWeekParam(dates)
 
   useEffect(() => {
-  const load = async () => {
-    setLoading(true)
-    const start = dates[0]
-    const end = new Date(dates[6])
-    end.setDate(end.getDate() + 1)
-    const [empRes, shiftRes] = await Promise.all([
-      api.get('/employees'),
-      api.get(`/shifts?startDate=${start.toISOString()}&endDate=${end.toISOString()}`),
-    ])
-    const uniqueEmployees = empRes.data.filter(
-      (emp: Employee, index: number, self: Employee[]) =>
-        index === self.findLastIndex((e: Employee) => e.name === emp.name)
-    )
-    setEmployees(uniqueEmployees)
-    setShifts(shiftRes.data)
-    setLoading(false)
-  }
-  load()
+    const load = async () => {
+      setLoading(true)
+      const start = dates[0]
+      const end = new Date(dates[6])
+      end.setDate(end.getDate() + 1)
+      const [empRes, shiftRes] = await Promise.all([
+        api.get('/employees'),
+        api.get(`/shifts?startDate=${start.toISOString()}&endDate=${end.toISOString()}`),
+      ])
+      const uniqueEmployees = empRes.data.filter(
+        (emp: Employee, index: number, self: Employee[]) =>
+          index === self.findLastIndex((e: Employee) => e.name === emp.name)
+      )
+      setEmployees(uniqueEmployees)
+      setShifts(shiftRes.data)
+      setLoading(false)
+    }
+    load()
   }, [weekOffset])
 
-  const getShift = (employeeId: string, date: Date) => {
-    const found = shifts.find(s => {
+  const getShift = (employeeId: string, date: Date) =>
+    shifts.find(s => {
       const sd = new Date(s.startTime)
-      console.log(
-        'Compare:',
-        s.employeeId === employeeId,
-        sd.getUTCDate(), '===', date.getDate(),
-        sd.getUTCMonth(), '===', date.getMonth()
-      )
       return s.employeeId === employeeId &&
         sd.getUTCDate() === date.getDate() &&
         sd.getUTCMonth() === date.getMonth() &&
         sd.getUTCFullYear() === date.getFullYear()
     })
-    return found
-  }
 
   const openModal = (employeeId: string, date: Date) => {
     setModal({ employeeId, date })
@@ -83,9 +75,9 @@ export default function WeekPlanning() {
   const createShift = async () => {
     if (!modal) return
     const start = new Date(modal.date)
-    start.setHours(parseInt(form.startHour), 0, 0, 0)
+    start.setUTCHours(parseInt(form.startHour), 0, 0, 0)
     const end = new Date(modal.date)
-    end.setHours(parseInt(form.endHour), 0, 0, 0)
+    end.setUTCHours(parseInt(form.endHour), 0, 0, 0)
     try {
       await api.post('/shifts', {
         employeeId: modal.employeeId,
@@ -94,7 +86,10 @@ export default function WeekPlanning() {
         site: form.site || undefined,
       })
       setModal(null)
-      const res = await api.get(`/shifts?week=${weekParam}`)
+      const s = dates[0]
+      const e = new Date(dates[6])
+      e.setDate(e.getDate() + 1)
+      const res = await api.get(`/shifts?startDate=${s.toISOString()}&endDate=${e.toISOString()}`)
       setShifts(res.data)
     } catch (err: any) {
       alert(err.response?.data?.error || 'Erreur')
@@ -104,6 +99,21 @@ export default function WeekPlanning() {
   const deleteShift = async (id: string) => {
     await api.delete(`/shifts/${id}`)
     setShifts(shifts.filter(s => s.id !== id))
+  }
+
+  const publishPlanning = async () => {
+    const start = dates[0]
+    const end = new Date(dates[6])
+    end.setDate(end.getDate() + 1)
+    try {
+      const res = await api.post('/shifts/publish', {
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      })
+      alert(`Planning publié — ${res.data.results.length} SMS envoyés`)
+    } catch {
+      alert('Erreur lors de la publication')
+    }
   }
 
   if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
@@ -125,6 +135,12 @@ export default function WeekPlanning() {
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
           >
             Semaine suiv. →
+          </button>
+          <button
+            onClick={publishPlanning}
+            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Publier le planning
           </button>
         </div>
       </div>
@@ -155,7 +171,7 @@ export default function WeekPlanning() {
                       {shift ? (
                         <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-xs group relative">
                           <div className="font-medium text-blue-800">
-                            {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
+                            {new Date(shift.startTime).getUTCHours()}h–{new Date(shift.endTime).getUTCHours()}h
                           </div>
                           {shift.site && (
                             <div className="text-blue-600 mt-0.5">{shift.site}</div>
