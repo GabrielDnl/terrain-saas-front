@@ -62,9 +62,9 @@ export default function WeekPlanning() {
     shifts.find(s => {
       const sd = new Date(s.startTime)
       return s.employeeId === employeeId &&
-        sd.getUTCDate() === date.getDate() &&
-        sd.getUTCMonth() === date.getMonth() &&
-        sd.getUTCFullYear() === date.getFullYear()
+        sd.getDate() === date.getDate() &&
+        sd.getMonth() === date.getMonth() &&
+        sd.getFullYear() === date.getFullYear()
     })
 
   const openModal = (employeeId: string, date: Date) => {
@@ -75,9 +75,9 @@ export default function WeekPlanning() {
   const createShift = async () => {
     if (!modal) return
     const start = new Date(modal.date)
-    start.setUTCHours(parseInt(form.startHour), 0, 0, 0)
+    start.setHours(parseInt(form.startHour), 0, 0, 0)
     const end = new Date(modal.date)
-    end.setUTCHours(parseInt(form.endHour), 0, 0, 0)
+    end.setHours(parseInt(form.endHour), 0, 0, 0)
     try {
       await api.post('/shifts', {
         employeeId: modal.employeeId,
@@ -171,7 +171,7 @@ export default function WeekPlanning() {
                       {shift ? (
                         <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-xs group relative">
                           <div className="font-medium text-blue-800">
-                            {new Date(shift.startTime).getUTCHours()}h–{new Date(shift.endTime).getUTCHours()}h
+                            {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
                           </div>
                           {shift.site && (
                             <div className="text-blue-600 mt-0.5">{shift.site}</div>

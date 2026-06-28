@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import WeekPlanning from './components/WeekPlanning'
+import AgentPlanning from './pages/AgentPlanning'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -17,6 +18,7 @@ export default function App() {
             <WeekPlanning />
           </PrivateRoute>
         } />
+        <Route path="/mon-planning/:token" element={<AgentPlanning />} />
         <Route path="*" element={<Navigate to="/planning" />} />
       </Routes>
     </BrowserRouter>
