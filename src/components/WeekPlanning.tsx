@@ -37,35 +37,39 @@ export default function WeekPlanning() {
   const dates = getWeekDates(weekOffset)
   const weekParam = getWeekParam(dates)
 
+  const loadData = async () => {
+    setLoading(true)
+    const start = dates[0]
+    const end = new Date(dates[6])
+    end.setDate(end.getDate() + 1)
+    const [empRes, shiftRes] = await Promise.all([
+      api.get('/employees'),
+      api.get(`/shifts?startDate=${start.toISOString()}&endDate=${end.toISOString()}`),
+    ])
+    const uniqueEmployees = empRes.data.filter(
+      (emp: Employee, index: number, self: Employee[]) =>
+        index === self.findLastIndex((e: Employee) => e.name === emp.name)
+    )
+    setEmployees(uniqueEmployees)
+    setShifts(shiftRes.data)
+    setLoading(false)
+  }
+
   useEffect(() => {
-    const load = async () => {
-      setLoading(true)
-      const start = dates[0]
-      const end = new Date(dates[6])
-      end.setDate(end.getDate() + 1)
-      const [empRes, shiftRes] = await Promise.all([
-        api.get('/employees'),
-        api.get(`/shifts?startDate=${start.toISOString()}&endDate=${end.toISOString()}`),
-      ])
-      const uniqueEmployees = empRes.data.filter(
-        (emp: Employee, index: number, self: Employee[]) =>
-          index === self.findLastIndex((e: Employee) => e.name === emp.name)
-      )
-      setEmployees(uniqueEmployees)
-      setShifts(shiftRes.data)
-      setLoading(false)
-    }
-    load()
+    loadData()
   }, [weekOffset])
 
-  const getShift = (employeeId: string, date: Date) =>
-    shifts.find(s => {
+  const getShiftsForCell = (employeeId: string, date: Date) =>
+    shifts.filter(s => {
       const sd = new Date(s.startTime)
       return s.employeeId === employeeId &&
         sd.getDate() === date.getDate() &&
         sd.getMonth() === date.getMonth() &&
         sd.getFullYear() === date.getFullYear()
     })
+
+  const hasConflict = (employeeId: string, date: Date) =>
+    getShiftsForCell(employeeId, date).length > 1
 
   const openModal = (employeeId: string, date: Date) => {
     setModal({ employeeId, date })
@@ -86,11 +90,7 @@ export default function WeekPlanning() {
         site: form.site || undefined,
       })
       setModal(null)
-      const s = dates[0]
-      const e = new Date(dates[6])
-      e.setDate(e.getDate() + 1)
-      const res = await api.get(`/shifts?startDate=${s.toISOString()}&endDate=${e.toISOString()}`)
-      setShifts(res.data)
+      await loadData()
     } catch (err: any) {
       alert(err.response?.data?.error || 'Erreur')
     }
@@ -116,13 +116,33 @@ export default function WeekPlanning() {
     }
   }
 
+  const copyPreviousWeek = async () => {
+    const prevDates = getWeekDates(weekOffset - 1)
+    const sourceStart = prevDates[0]
+    const sourceEnd = new Date(prevDates[6])
+    sourceEnd.setDate(prevDates[6].getDate() + 1)
+    const targetStart = dates[0]
+
+    try {
+      const res = await api.post('/shifts/copy-week', {
+        sourceStart: sourceStart.toISOString(),
+        sourceEnd: sourceEnd.toISOString(),
+        targetStart: targetStart.toISOString(),
+      })
+      alert(`${res.data.copied} shifts copiés depuis la semaine précédente`)
+      await loadData()
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erreur lors de la copie')
+    }
+  }
+
   if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-xl font-medium text-gray-900">Planning</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setWeekOffset(w => w - 1)}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
@@ -135,6 +155,12 @@ export default function WeekPlanning() {
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
           >
             Semaine suiv. →
+          </button>
+          <button
+            onClick={copyPreviousWeek}
+            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            Copier sem. préc.
           </button>
           <button
             onClick={publishPlanning}
@@ -165,23 +191,40 @@ export default function WeekPlanning() {
               <tr key={emp.id} className="border-t border-gray-100">
                 <td className="p-3 text-sm font-medium text-gray-700">{emp.name}</td>
                 {dates.map((date, i) => {
-                  const shift = getShift(emp.id, date)
+                  const cellShifts = getShiftsForCell(emp.id, date)
+                  const conflict = hasConflict(emp.id, date)
                   return (
                     <td key={i} className="p-1.5 text-center">
-                      {shift ? (
-                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-xs group relative">
-                          <div className="font-medium text-blue-800">
-                            {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
-                          </div>
-                          {shift.site && (
-                            <div className="text-blue-600 mt-0.5">{shift.site}</div>
-                          )}
-                          <button
-                            onClick={() => deleteShift(shift.id)}
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs"
-                          >
-                            ✕
-                          </button>
+                      {cellShifts.length > 0 ? (
+                        <div className="space-y-1">
+                          {cellShifts.map(shift => (
+                            <div
+                              key={shift.id}
+                              className={`border rounded-lg p-2 text-xs group relative ${
+                                conflict
+                                  ? 'bg-red-50 border-red-200'
+                                  : 'bg-blue-50 border-blue-100'
+                              }`}
+                            >
+                              <div className={`font-medium ${conflict ? 'text-red-800' : 'text-blue-800'}`}>
+                                {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
+                              </div>
+                              {shift.site && (
+                                <div className={conflict ? 'text-red-600 mt-0.5' : 'text-blue-600 mt-0.5'}>
+                                  {shift.site}
+                                </div>
+                              )}
+                              {conflict && (
+                                <div className="text-red-500 text-xs mt-0.5 font-medium">⚠ Conflit</div>
+                              )}
+                              <button
+                                onClick={() => deleteShift(shift.id)}
+                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <button
