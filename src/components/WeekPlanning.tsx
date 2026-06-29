@@ -167,6 +167,11 @@ export default function WeekPlanning() {
           >
             Vue live
           </a>
+          <a href="/recap"
+            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            Récap mensuel
+          </a>
           <button
             onClick={publishPlanning}
             className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"

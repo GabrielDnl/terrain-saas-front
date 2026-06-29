@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import WeekPlanning from './components/WeekPlanning'
 import AgentPlanning from './pages/AgentPlanning'
 import LiveView from './pages/LiveView'
+import Recap from './pages/Recap'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -22,6 +23,11 @@ export default function App() {
         <Route path="/live" element={
           <PrivateRoute>
             <LiveView />
+          </PrivateRoute>
+        } />
+        <Route path="/recap" element={
+          <PrivateRoute>
+            <Recap />
           </PrivateRoute>
         } />
         <Route path="/mon-planning/:token" element={<AgentPlanning />} />
