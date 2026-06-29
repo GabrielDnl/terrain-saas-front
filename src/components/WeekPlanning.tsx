@@ -122,7 +122,6 @@ export default function WeekPlanning() {
     const sourceEnd = new Date(prevDates[6])
     sourceEnd.setDate(prevDates[6].getDate() + 1)
     const targetStart = dates[0]
-
     try {
       const res = await api.post('/shifts/copy-week', {
         sourceStart: sourceStart.toISOString(),
@@ -162,6 +161,12 @@ export default function WeekPlanning() {
           >
             Copier sem. préc.
           </button>
+          
+          <a href="/live"
+            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            Vue live
+          </a>
           <button
             onClick={publishPlanning}
             className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -215,7 +220,7 @@ export default function WeekPlanning() {
                                 </div>
                               )}
                               {conflict && (
-                                <div className="text-red-500 text-xs mt-0.5 font-medium">⚠ Conflit</div>
+                                <div className="text-red-500 text-xs mt-0.5 font-medium">Conflit</div>
                               )}
                               <button
                                 onClick={() => deleteShift(shift.id)}
