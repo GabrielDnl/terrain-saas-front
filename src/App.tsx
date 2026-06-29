@@ -4,6 +4,7 @@ import WeekPlanning from './components/WeekPlanning'
 import AgentPlanning from './pages/AgentPlanning'
 import LiveView from './pages/LiveView'
 import Recap from './pages/Recap'
+import Upgrade from './pages/Upgrade'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -16,19 +17,16 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/planning" element={
-          <PrivateRoute>
-            <WeekPlanning />
-          </PrivateRoute>
+          <PrivateRoute><WeekPlanning /></PrivateRoute>
         } />
         <Route path="/live" element={
-          <PrivateRoute>
-            <LiveView />
-          </PrivateRoute>
+          <PrivateRoute><LiveView /></PrivateRoute>
         } />
         <Route path="/recap" element={
-          <PrivateRoute>
-            <Recap />
-          </PrivateRoute>
+          <PrivateRoute><Recap /></PrivateRoute>
+        } />
+        <Route path="/upgrade" element={
+          <PrivateRoute><Upgrade /></PrivateRoute>
         } />
         <Route path="/mon-planning/:token" element={<AgentPlanning />} />
         <Route path="*" element={<Navigate to="/planning" />} />
