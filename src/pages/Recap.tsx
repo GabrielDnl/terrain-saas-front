@@ -19,6 +19,7 @@ export default function Recap() {
   const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
   const [recap, setRecap] = useState<RecapEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
 
   const loadRecap = async () => {
     setLoading(true)
@@ -42,6 +43,28 @@ export default function Recap() {
     setMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`)
   }
 
+  const exportCSV = async () => {
+    setExporting(true)
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/timelog/export/${month}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `paie-${month}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error(error)
+      alert('Erreur lors de l\'export')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const monthLabel = new Date(month + '-01').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 
   if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
@@ -50,7 +73,7 @@ export default function Recap() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-xl font-medium text-gray-900">Récap mensuel</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => changeMonth(-1)}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
@@ -63,6 +86,13 @@ export default function Recap() {
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
           >
             Mois suiv. →
+          </button>
+          <button
+            onClick={exportCSV}
+            disabled={exporting}
+            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {exporting ? 'Export...' : 'Exporter CSV'}
           </button>
         </div>
       </div>
