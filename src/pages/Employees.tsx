@@ -72,58 +72,55 @@ export default function Employees() {
     }
   }
 
-  if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
+  if (loading) return <div className="p-8" style={{ color: 'var(--ts-text-2)' }}>Chargement...</div>
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-medium text-gray-900">Agents</h1>
+        <h1 className="text-xl font-medium" style={{ color: 'var(--ts-text)' }}>Agents</h1>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+          className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5"
+          style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
         >
-          + Ajouter un agent
+          <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }}></i>
+          Ajouter un agent
         </button>
       </div>
 
       {employees.length === 0 ? (
-        <div className="bg-white border border-gray-100 rounded-xl p-12 text-center">
-          <p className="text-gray-400 text-sm mb-4">Aucun agent pour le moment</p>
+        <div className="rounded-xl p-12 text-center border" style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}>
+          <p className="text-sm mb-4" style={{ color: 'var(--ts-text-3)' }}>Aucun agent pour le moment</p>
           <button
             onClick={openCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+            className="px-4 py-2 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
           >
             Ajouter votre premier agent
           </button>
         </div>
       ) : (
-        <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+        <div className="rounded-xl overflow-hidden border" style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}>
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-500">Nom</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-500">Téléphone</th>
-                <th className="text-center p-3 text-sm font-medium text-gray-500">Heures contrat</th>
+                <th className="text-left p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Nom</th>
+                <th className="text-left p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Téléphone</th>
+                <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Heures contrat</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
             <tbody>
               {employees.map(emp => (
-                <tr key={emp.id} className="border-t border-gray-100">
-                  <td className="p-3 text-sm font-medium text-gray-900">{emp.name}</td>
-                  <td className="p-3 text-sm text-gray-500">{emp.phone || '—'}</td>
-                  <td className="p-3 text-sm text-center text-gray-500">{emp.contractHours}h</td>
+                <tr key={emp.id} className="border-t" style={{ borderColor: 'var(--ts-border)' }}>
+                  <td className="p-3 text-sm font-medium" style={{ color: 'var(--ts-text)' }}>{emp.name}</td>
+                  <td className="p-3 text-sm" style={{ color: 'var(--ts-text-2)' }}>{emp.phone || '—'}</td>
+                  <td className="p-3 text-sm text-center" style={{ color: 'var(--ts-text-2)' }}>{emp.contractHours}h</td>
                   <td className="p-3 text-right flex items-center justify-end gap-3">
-                    <button
-                      onClick={() => openEdit(emp)}
-                      className="text-xs text-blue-500 hover:text-blue-700"
-                    >
+                    <button onClick={() => openEdit(emp)} className="text-xs" style={{ color: 'var(--ts-accent)' }}>
                       Modifier
                     </button>
-                    <button
-                      onClick={() => deleteEmployee(emp.id)}
-                      className="text-xs text-red-400 hover:text-red-600"
-                    >
+                    <button onClick={() => deleteEmployee(emp.id)} className="text-xs" style={{ color: 'var(--ts-red)' }}>
                       Supprimer
                     </button>
                   </td>
@@ -136,52 +133,57 @@ export default function Employees() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
-            <h2 className="text-base font-medium mb-4">
-              {modal === 'create' ? 'Nouvel agent' : 'Modifier l\'agent'}
+          <div className="rounded-xl p-6 w-80 shadow-xl" style={{ background: 'var(--ts-bg-1)' }}>
+            <h2 className="text-base font-medium mb-4" style={{ color: 'var(--ts-text)' }}>
+              {modal === 'create' ? 'Nouvel agent' : "Modifier l'agent"}
             </h2>
-            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+            {error && <p className="text-sm mb-3" style={{ color: 'var(--ts-red)' }}>{error}</p>}
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Nom complet</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Nom complet</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Ex: Karim Mensah"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  className="w-full rounded-lg px-3 py-2 text-sm border"
+                  style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Téléphone (pour SMS)</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Téléphone (pour SMS)</label>
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                   placeholder="Ex: 0612345678"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  className="w-full rounded-lg px-3 py-2 text-sm border"
+                  style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Heures contrat/mois</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Heures contrat/mois</label>
                 <input
                   type="number"
                   value={form.contractHours}
                   onChange={e => setForm(f => ({ ...f, contractHours: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  className="w-full rounded-lg px-3 py-2 text-sm border"
+                  style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
                 />
               </div>
             </div>
             <div className="flex gap-2 mt-5">
               <button
                 onClick={() => { setModal(null); setError('') }}
-                className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="flex-1 px-4 py-2 text-sm rounded-lg border"
+                style={{ borderColor: 'var(--ts-border-strong)', color: 'var(--ts-text-2)' }}
               >
                 Annuler
               </button>
               <button
                 onClick={saveEmployee}
-                className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-4 py-2 text-sm rounded-lg font-medium"
+                style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
               >
                 {modal === 'create' ? 'Ajouter' : 'Enregistrer'}
               </button>

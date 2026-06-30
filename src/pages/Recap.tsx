@@ -59,7 +59,7 @@ export default function Recap() {
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error(error)
-      alert('Erreur lors de l\'export')
+      alert("Erreur lors de l'export")
     } finally {
       setExporting(false)
     }
@@ -67,31 +67,35 @@ export default function Recap() {
 
   const monthLabel = new Date(month + '-01').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 
-  if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
+  if (loading) return <div className="p-8" style={{ color: 'var(--ts-text-2)' }}>Chargement...</div>
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-xl font-medium text-gray-900">Récap mensuel</h1>
+        <h1 className="text-xl font-medium" style={{ color: 'var(--ts-text)' }}>Récap mensuel</h1>
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => changeMonth(-1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+            className="px-3 py-1.5 text-sm rounded-lg border"
+            style={{ borderColor: 'var(--ts-border-strong)', color: 'var(--ts-text-2)' }}
           >
             ← Mois préc.
           </button>
-          <span className="text-sm text-gray-500 capitalize">{monthLabel}</span>
+          <span className="text-sm capitalize" style={{ color: 'var(--ts-text-2)' }}>{monthLabel}</span>
           <button
             onClick={() => changeMonth(1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+            className="px-3 py-1.5 text-sm rounded-lg border"
+            style={{ borderColor: 'var(--ts-border-strong)', color: 'var(--ts-text-2)' }}
           >
             Mois suiv. →
           </button>
           <button
             onClick={exportCSV}
             disabled={exporting}
-            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1.5 text-sm rounded-lg font-medium disabled:opacity-50 flex items-center gap-1.5"
+            style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
           >
+            <i className="ti ti-file-export" aria-hidden="true" style={{ fontSize: 14 }}></i>
             {exporting ? 'Export...' : 'Exporter CSV'}
           </button>
         </div>
@@ -101,12 +105,12 @@ export default function Recap() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left p-3 text-sm font-medium text-gray-500">Agent</th>
-              <th className="text-center p-3 text-sm font-medium text-gray-500">Heures contrat</th>
-              <th className="text-center p-3 text-sm font-medium text-gray-500">Heures planifiées</th>
-              <th className="text-center p-3 text-sm font-medium text-gray-500">Heures réalisées</th>
-              <th className="text-center p-3 text-sm font-medium text-gray-500">Absences</th>
-              <th className="text-center p-3 text-sm font-medium text-gray-500">Statut paie</th>
+              <th className="text-left p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Agent</th>
+              <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Heures contrat</th>
+              <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Heures planifiées</th>
+              <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Heures réalisées</th>
+              <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Absences</th>
+              <th className="text-center p-3 text-sm font-medium" style={{ color: 'var(--ts-text-2)' }}>Statut paie</th>
             </tr>
           </thead>
           <tbody>
@@ -114,35 +118,41 @@ export default function Recap() {
               const diff = entry.workedHours - entry.contractHours
               const isOk = entry.absences === 0
               return (
-                <tr key={entry.employee.id} className="border-t border-gray-100">
-                  <td className="p-3 text-sm font-medium text-gray-900">{entry.employee.name}</td>
-                  <td className="p-3 text-sm text-center text-gray-600">{entry.contractHours}h</td>
-                  <td className="p-3 text-sm text-center text-gray-600">{entry.plannedHours}h</td>
+                <tr key={entry.employee.id} className="border-t" style={{ borderColor: 'var(--ts-border)' }}>
+                  <td className="p-3 text-sm font-medium" style={{ color: 'var(--ts-text)' }}>{entry.employee.name}</td>
+                  <td className="p-3 text-sm text-center" style={{ color: 'var(--ts-text-2)' }}>{entry.contractHours}h</td>
+                  <td className="p-3 text-sm text-center" style={{ color: 'var(--ts-text-2)' }}>{entry.plannedHours}h</td>
                   <td className="p-3 text-sm text-center">
-                    <span className={entry.workedHours > 0 ? 'text-green-700 font-medium' : 'text-gray-400'}>
+                    <span style={{ color: entry.workedHours > 0 ? 'var(--ts-green-text)' : 'var(--ts-text-3)', fontWeight: entry.workedHours > 0 ? 500 : 400 }}>
                       {entry.workedHours}h
                     </span>
                     {diff > 0 && (
-                      <span className="text-xs text-green-600 ml-1">+{diff.toFixed(1)}h sup.</span>
+                      <span className="text-xs ml-1" style={{ color: 'var(--ts-green-text)' }}>+{diff.toFixed(1)}h sup.</span>
                     )}
                     {diff < 0 && entry.workedHours > 0 && (
-                      <span className="text-xs text-amber-600 ml-1">{diff.toFixed(1)}h</span>
+                      <span className="text-xs ml-1" style={{ color: 'var(--ts-amber-text)' }}>{diff.toFixed(1)}h</span>
                     )}
                   </td>
                   <td className="p-3 text-sm text-center">
                     {entry.absences > 0 ? (
-                      <span className="text-red-600 font-medium">{entry.absences}</span>
+                      <span className="font-medium" style={{ color: 'var(--ts-red)' }}>{entry.absences}</span>
                     ) : (
-                      <span className="text-green-600">0</span>
+                      <span style={{ color: 'var(--ts-green)' }}>0</span>
                     )}
                   </td>
                   <td className="p-3 text-center">
                     {isOk ? (
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-100">
+                      <span
+                        className="text-xs font-medium px-2 py-1 rounded-full border"
+                        style={{ background: 'var(--ts-green-bg)', color: 'var(--ts-green-text)', borderColor: 'var(--ts-border-strong)' }}
+                      >
                         Prêt
                       </span>
                     ) : (
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                      <span
+                        className="text-xs font-medium px-2 py-1 rounded-full border"
+                        style={{ background: 'var(--ts-amber-bg)', color: 'var(--ts-amber-text)', borderColor: 'var(--ts-border-strong)' }}
+                      >
                         À vérifier
                       </span>
                     )}

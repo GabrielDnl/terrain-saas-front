@@ -18,14 +18,18 @@ export default function Upgrade() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-gray-200 p-8 max-w-md w-full">
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">Passer à l'abonnement</h1>
-        <p className="text-gray-500 text-sm mb-8">Accédez à toutes les fonctionnalités pour gérer votre équipe terrain.</p>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--ts-bg)' }}>
+      <div className="rounded-2xl border p-8 max-w-md w-full" style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}>
+        <h1 className="text-2xl font-medium mb-2" style={{ color: 'var(--ts-text)' }}>Passer à l'abonnement</h1>
+        <p className="text-sm mb-8" style={{ color: 'var(--ts-text-2)' }}>
+          Accédez à toutes les fonctionnalités pour gérer votre équipe terrain.
+        </p>
 
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-6">
-          <div className="text-3xl font-medium text-blue-900 mb-1">59 €<span className="text-lg font-normal text-blue-600">/mois</span></div>
-          <div className="text-sm text-blue-700 mb-4">Jusqu'à 10 agents · Sans engagement</div>
+        <div className="rounded-xl p-6 mb-6 border" style={{ background: 'var(--ts-accent-bg)', borderColor: 'var(--ts-border-strong)' }}>
+          <div className="text-3xl font-medium mb-1" style={{ color: 'var(--ts-accent-text)' }}>
+            59 €<span className="text-lg font-normal" style={{ color: 'var(--ts-accent)' }}>/mois</span>
+          </div>
+          <div className="text-sm mb-4" style={{ color: 'var(--ts-accent-text)' }}>Jusqu'à 10 agents · Sans engagement</div>
           <ul className="space-y-2">
             {[
               'Planning hebdomadaire illimité',
@@ -34,8 +38,8 @@ export default function Upgrade() {
               'Récap mensuel + export paie CSV',
               'Vue temps réel de votre équipe',
             ].map(feature => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-blue-800">
-                <span className="text-blue-500">✓</span>
+              <li key={feature} className="flex items-center gap-2 text-sm" style={{ color: 'var(--ts-accent-text)' }}>
+                <i className="ti ti-check" aria-hidden="true" style={{ fontSize: 14, color: 'var(--ts-accent)' }}></i>
                 {feature}
               </li>
             ))}
@@ -45,11 +49,12 @@ export default function Upgrade() {
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="w-full py-3 rounded-xl text-sm font-medium disabled:opacity-50"
+          style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
         >
-          {loading ? 'Redirection...' : 'Commencer l\'essai gratuit 30 jours'}
+          {loading ? 'Redirection...' : "Commencer l'essai gratuit 30 jours"}
         </button>
-        <p className="text-xs text-gray-400 text-center mt-3">Paiement sécurisé par Stripe</p>
+        <p className="text-xs text-center mt-3" style={{ color: 'var(--ts-text-3)' }}>Paiement sécurisé par Stripe</p>
       </div>
     </div>
   )

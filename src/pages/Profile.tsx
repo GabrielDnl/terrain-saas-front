@@ -36,56 +36,67 @@ export default function Profile() {
 
   return (
     <div className="p-6 max-w-lg mx-auto">
-      <h1 className="text-xl font-medium text-gray-900 mb-6">Mon profil</h1>
+      <h1 className="text-xl font-medium mb-6" style={{ color: 'var(--ts-text)' }}>Mon profil</h1>
 
-      <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
-        {success && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{success}</p>}
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className="rounded-xl p-6 space-y-4 border" style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}>
+        {success && (
+          <p className="text-sm px-3 py-2 rounded-lg" style={{ background: 'var(--ts-green-bg)', color: 'var(--ts-green-text)' }}>
+            {success}
+          </p>
+        )}
+        {error && <p className="text-sm" style={{ color: 'var(--ts-red)' }}>{error}</p>}
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Entreprise</label>
+          <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Entreprise</label>
           <input
             type="text"
             value={companyName}
             disabled
-            className="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border)', background: 'var(--ts-bg-2)', color: 'var(--ts-text-3)' }}
           />
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Email</label>
+          <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Email</label>
           <input
             type="email"
             value={email}
             disabled
-            className="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border)', background: 'var(--ts-bg-2)', color: 'var(--ts-text-3)' }}
           />
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Nom complet</label>
+          <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>Nom complet</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
           />
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+          <label className="text-xs mb-1 block" style={{ color: 'var(--ts-text-2)' }}>
+            Nouveau mot de passe (laisser vide pour ne pas changer)
+          </label>
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
           />
         </div>
 
         <button
           onClick={handleSave}
-          className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+          className="w-full py-2 rounded-lg text-sm font-medium"
+          style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
         >
           Enregistrer
         </button>

@@ -3,7 +3,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import WeekPlanning from './components/WeekPlanning'
 import AgentPlanning from './pages/AgentPlanning'
-import LiveView from './pages/LiveView'
+import Dashboard from './pages/Dashboard'
 import Recap from './pages/Recap'
 import Upgrade from './pages/Upgrade'
 import Employees from './pages/Employees'
@@ -22,14 +22,14 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/mon-planning/:token" element={<AgentPlanning />} />
+        <Route path="/" element={
+          <PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>
+        } />
         <Route path="/planning" element={
           <PrivateRoute><Layout><WeekPlanning /></Layout></PrivateRoute>
         } />
         <Route path="/agents" element={
           <PrivateRoute><Layout><Employees /></Layout></PrivateRoute>
-        } />
-        <Route path="/live" element={
-          <PrivateRoute><Layout><LiveView /></Layout></PrivateRoute>
         } />
         <Route path="/recap" element={
           <PrivateRoute><Layout><Recap /></Layout></PrivateRoute>
@@ -40,7 +40,7 @@ export default function App() {
         <Route path="/profile" element={
           <PrivateRoute><Layout><Profile /></Layout></PrivateRoute>
         } />
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   )

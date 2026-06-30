@@ -71,53 +71,62 @@ export default function LiveView() {
 
   const inPost = (empId: string) => live.find(t => t.employee.id === empId)
 
-  if (loading) return <div className="p-8 text-gray-500">Chargement...</div>
+  if (loading) return <div className="p-8" style={{ color: 'var(--ts-text-2)' }}>Chargement...</div>
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-medium text-gray-900">Vue en temps réel</h1>
-          <p className="text-xs text-gray-400 mt-1">
+          <h1 className="text-xl font-medium" style={{ color: 'var(--ts-text)' }}>Vue en temps réel</h1>
+          <p className="text-xs mt-1" style={{ color: 'var(--ts-text-3)' }}>
             Mis à jour à {lastUpdate.getHours()}h{String(lastUpdate.getMinutes()).padStart(2, '0')}
             — rafraîchissement auto toutes les 30s
           </p>
         </div>
         <button
           onClick={loadData}
-          className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+          className="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+          style={{ borderColor: 'var(--ts-border-strong)', color: 'var(--ts-text-2)' }}
         >
           Rafraîchir
         </button>
       </div>
 
       <div className="grid grid-cols-4 gap-3 mb-6">
-        <div className="bg-gray-50 rounded-xl p-4">
-          <div className="text-2xl font-medium text-gray-900">{uniqueEmployees.length}</div>
-          <div className="text-xs text-gray-500 mt-1">Agents total</div>
+        <div className="rounded-xl p-4" style={{ background: 'var(--ts-bg-2)' }}>
+          <div className="text-2xl font-medium" style={{ color: 'var(--ts-text)' }}>{uniqueEmployees.length}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--ts-text-2)' }}>Agents total</div>
         </div>
-        <div className="bg-green-50 rounded-xl p-4">
-          <div className="text-2xl font-medium text-green-700">{live.length}</div>
-          <div className="text-xs text-green-600 mt-1">En poste</div>
+        <div className="rounded-xl p-4" style={{ background: 'var(--ts-green-bg)' }}>
+          <div className="text-2xl font-medium" style={{ color: 'var(--ts-green-text)' }}>{live.length}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--ts-green-text)' }}>En poste</div>
         </div>
-        <div className="bg-red-50 rounded-xl p-4">
-          <div className="text-2xl font-medium text-red-700">{uniqueEmployees.length - live.length - absences.length}</div>
-          <div className="text-xs text-red-600 mt-1">Non pointés</div>
+        <div className="rounded-xl p-4" style={{ background: 'var(--ts-red-bg)' }}>
+          <div className="text-2xl font-medium" style={{ color: 'var(--ts-red-text)' }}>
+            {uniqueEmployees.length - live.length - absences.length}
+          </div>
+          <div className="text-xs mt-1" style={{ color: 'var(--ts-red-text)' }}>Non pointés</div>
         </div>
-        <div className="bg-amber-50 rounded-xl p-4">
-          <div className="text-2xl font-medium text-amber-700">{absences.length}</div>
-          <div className="text-xs text-amber-600 mt-1">Absences signalées</div>
+        <div className="rounded-xl p-4" style={{ background: 'var(--ts-amber-bg)' }}>
+          <div className="text-2xl font-medium" style={{ color: 'var(--ts-amber-text)' }}>{absences.length}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--ts-amber-text)' }}>Absences signalées</div>
         </div>
       </div>
 
       {absences.length > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6">
-          <div className="text-sm font-medium text-amber-800 mb-2">⚠ Absences signalées aujourd'hui</div>
+        <div
+          className="rounded-xl p-4 mb-6 border"
+          style={{ background: 'var(--ts-amber-bg)', borderColor: 'var(--ts-border-strong)' }}
+        >
+          <div className="text-sm font-medium mb-2 flex items-center gap-1.5" style={{ color: 'var(--ts-amber-text)' }}>
+            <i className="ti ti-alert-triangle" aria-hidden="true" style={{ fontSize: 16 }}></i>
+            Absences signalées aujourd'hui
+          </div>
           <div className="space-y-2">
             {absences.map(absence => (
               <div key={absence.id} className="flex items-center justify-between text-sm">
-                <span className="text-amber-700 font-medium">{absence.employee.name}</span>
-                <span className="text-amber-600 text-xs">
+                <span className="font-medium" style={{ color: 'var(--ts-amber-text)' }}>{absence.employee.name}</span>
+                <span className="text-xs" style={{ color: 'var(--ts-amber-text)' }}>
                   à {new Date(absence.createdAt).getHours()}h{String(new Date(absence.createdAt).getMinutes()).padStart(2, '0')}
                 </span>
               </div>
@@ -130,33 +139,36 @@ export default function LiveView() {
         {uniqueEmployees.map(emp => {
           const timelog = inPost(emp.id)
           const absence = absences.find(a => a.employee.id === emp.id)
+          const dotColor = timelog ? 'var(--ts-green)' : absence ? 'var(--ts-amber)' : 'var(--ts-text-3)'
           return (
-            <div key={emp.id} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center justify-between">
+            <div
+              key={emp.id}
+              className="rounded-xl p-4 flex items-center justify-between border"
+              style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}
+            >
               <div className="flex items-center gap-3">
-                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                  timelog ? 'bg-green-500' : absence ? 'bg-amber-400' : 'bg-gray-300'
-                }`}></div>
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: dotColor }}></div>
                 <div>
-                  <div className="text-sm font-medium text-gray-900">{emp.name}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--ts-text)' }}>{emp.name}</div>
                   {timelog ? (
-                    <div className="text-xs text-green-600 mt-0.5">
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--ts-green-text)' }}>
                       Arrivé à {new Date(timelog.clockIn).getHours()}h{String(new Date(timelog.clockIn).getMinutes()).padStart(2, '0')}
                     </div>
                   ) : absence ? (
-                    <div className="text-xs text-amber-600 mt-0.5">Absence signalée</div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--ts-amber-text)' }}>Absence signalée</div>
                   ) : (
-                    <div className="text-xs text-gray-400 mt-0.5">Non pointé</div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--ts-text-3)' }}>Non pointé</div>
                   )}
                 </div>
               </div>
               <div className="text-right">
                 {timelog ? (
                   <div>
-                    <div className="text-sm font-medium text-green-700">{getElapsed(timelog.clockIn)}</div>
-                    <div className="text-xs text-gray-400">en poste</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--ts-green-text)' }}>{getElapsed(timelog.clockIn)}</div>
+                    <div className="text-xs" style={{ color: 'var(--ts-text-3)' }}>en poste</div>
                   </div>
                 ) : (
-                  <span className="text-xs text-gray-300">—</span>
+                  <span className="text-xs" style={{ color: 'var(--ts-text-3)' }}>—</span>
                 )}
               </div>
             </div>

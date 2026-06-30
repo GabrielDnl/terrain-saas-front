@@ -22,17 +22,18 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm">
-        <h1 className="text-xl font-medium text-gray-900 mb-6">Connexion</h1>
-        {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--ts-bg)' }}>
+      <div className="rounded-xl border p-8 w-full max-w-sm" style={{ background: 'var(--ts-bg-1)', borderColor: 'var(--ts-border)' }}>
+        <h1 className="text-xl font-medium mb-6" style={{ color: 'var(--ts-text)' }}>Connexion</h1>
+        {error && <p className="text-sm mb-4" style={{ color: 'var(--ts-red)' }}>{error}</p>}
         <div className="space-y-3">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
           />
           <input
             type="password"
@@ -40,19 +41,21 @@ export default function Login() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full rounded-lg px-3 py-2 text-sm border"
+            style={{ borderColor: 'var(--ts-border-strong)', background: 'var(--ts-bg-1)', color: 'var(--ts-text)' }}
           />
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+            className="w-full py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+            style={{ background: 'var(--ts-accent)', color: 'var(--ts-bg-1)' }}
           >
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </div>
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm mt-4" style={{ color: 'var(--ts-text-2)' }}>
           Pas encore de compte ?{' '}
-          <a href="/register" className="text-blue-600 hover:underline">
+          <a href="/register" style={{ color: 'var(--ts-accent)' }}>
             Créer un compte
           </a>
         </p>

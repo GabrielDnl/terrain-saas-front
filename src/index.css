@@ -1,1 +1,83 @@
 @import "tailwindcss";
+
+:root,
+[data-theme="emerald"] {
+  --ts-bg: #13171f;
+  --ts-bg-1: #191e29;
+  --ts-bg-2: #10141c;
+  --ts-nav-bg: #0f1319;
+  --ts-sidebar-bg: #0f1319;
+  --ts-border: rgba(255, 255, 255, 0.06);
+  --ts-border-strong: rgba(29, 184, 122, 0.22);
+  --ts-text: #dde3ee;
+  --ts-text-2: #8898b0;
+  --ts-text-3: #4a5568;
+  --ts-accent: #1db87a;
+  --ts-accent-bg: rgba(29, 184, 122, 0.1);
+  --ts-accent-text: #5dd4a4;
+  --ts-green: #1db87a;
+  --ts-green-bg: rgba(29, 184, 122, 0.1);
+  --ts-green-text: #1db87a;
+  --ts-amber: #f0a832;
+  --ts-amber-bg: rgba(240, 168, 50, 0.1);
+  --ts-amber-text: #f0a832;
+  --ts-red: #e05252;
+  --ts-red-bg: rgba(224, 82, 82, 0.1);
+  --ts-red-text: #e05252;
+}
+
+[data-theme="sl"] {
+  --ts-bg: #080d1a;
+  --ts-bg-1: #0d1526;
+  --ts-bg-2: #111d35;
+  --ts-nav-bg: #0d1526;
+  --ts-sidebar-bg: #070c18;
+  --ts-border: rgba(56, 189, 248, 0.14);
+  --ts-border-strong: rgba(56, 189, 248, 0.28);
+  --ts-text: #e2e8f0;
+  --ts-text-2: #94a3b8;
+  --ts-text-3: #5e6b80;
+  --ts-accent: #38bdf8;
+  --ts-accent-bg: rgba(56, 189, 248, 0.12);
+  --ts-accent-text: #7dd3fc;
+  --ts-green: #4ade80;
+  --ts-green-bg: rgba(74, 222, 128, 0.12);
+  --ts-green-text: #4ade80;
+  --ts-amber: #fbbf24;
+  --ts-amber-bg: rgba(251, 191, 36, 0.12);
+  --ts-amber-text: #fbbf24;
+  --ts-red: #f87171;
+  --ts-red-bg: rgba(248, 113, 113, 0.12);
+  --ts-red-text: #f87171;
+}
+
+[data-theme="sao"] {
+  --ts-bg: #f0f2f5;
+  --ts-bg-1: #ffffff;
+  --ts-bg-2: #faf8f3;
+  --ts-nav-bg: #ffffff;
+  --ts-sidebar-bg: #ffffff;
+  --ts-border: rgba(201, 168, 76, 0.22);
+  --ts-border-strong: rgba(201, 168, 76, 0.4);
+  --ts-text: #1a2236;
+  --ts-text-2: #6a7898;
+  --ts-text-3: #b0b8c8;
+  --ts-accent: #c9a84c;
+  --ts-accent-bg: rgba(201, 168, 76, 0.12);
+  --ts-accent-text: #8a6f23;
+  --ts-green: #52b87a;
+  --ts-green-bg: rgba(82, 184, 122, 0.12);
+  --ts-green-text: #2f8a55;
+  --ts-amber: #c9a84c;
+  --ts-amber-bg: rgba(201, 168, 76, 0.14);
+  --ts-amber-text: #8a6f23;
+  --ts-red: #e05252;
+  --ts-red-bg: rgba(224, 82, 82, 0.12);
+  --ts-red-text: #a33333;
+}
+
+body {
+  background: var(--ts-bg);
+  color: var(--ts-text);
+  transition: background 0.2s ease, color 0.2s ease;
+}
