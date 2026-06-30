@@ -31,11 +31,20 @@ export default function WeekPlanning() {
   const [shifts, setShifts] = useState<Shift[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState<{ employeeId: string; date: Date } | null>(null)
+  const [modal, setModal] = useState<{ employeeId: string; date: Date; shiftId?: string } | null>(null)
   const [form, setForm] = useState({ startHour: '07', endHour: '15', site: '' })
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
 
   const dates = getWeekDates(weekOffset)
   const weekParam = getWeekParam(dates)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('payment') === 'success') {
+      setPaymentSuccess(true)
+      window.history.replaceState({}, '', '/planning')
+    }
+  }, [])
 
   const loadData = async () => {
     setLoading(true)
@@ -65,24 +74,41 @@ export default function WeekPlanning() {
   const hasConflict = (employeeId: string, date: Date) =>
     getShiftsForCell(employeeId, date).length > 1
 
-  const openModal = (employeeId: string, date: Date) => {
-    setModal({ employeeId, date })
-    setForm({ startHour: '07', endHour: '15', site: '' })
+  const openModal = (employeeId: string, date: Date, shift?: Shift) => {
+    if (shift) {
+      setForm({
+        startHour: String(new Date(shift.startTime).getHours()).padStart(2, '0'),
+        endHour: String(new Date(shift.endTime).getHours()).padStart(2, '0'),
+        site: shift.site || '',
+      })
+      setModal({ employeeId, date, shiftId: shift.id })
+    } else {
+      setForm({ startHour: '07', endHour: '15', site: '' })
+      setModal({ employeeId, date })
+    }
   }
 
-  const createShift = async () => {
+  const saveShift = async () => {
     if (!modal) return
     const start = new Date(modal.date)
     start.setHours(parseInt(form.startHour), 0, 0, 0)
     const end = new Date(modal.date)
     end.setHours(parseInt(form.endHour), 0, 0, 0)
     try {
-      await api.post('/shifts', {
-        employeeId: modal.employeeId,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-        site: form.site || undefined,
-      })
+      if (modal.shiftId) {
+        await api.put(`/shifts/${modal.shiftId}`, {
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          site: form.site || undefined,
+        })
+      } else {
+        await api.post('/shifts', {
+          employeeId: modal.employeeId,
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          site: form.site || undefined,
+        })
+      }
       setModal(null)
       await loadData()
     } catch (err: any) {
@@ -133,46 +159,28 @@ export default function WeekPlanning() {
 
   return (
     <div className="p-6">
+      {paymentSuccess && (
+        <div className="mb-4 bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-sm text-green-700 flex items-center justify-between">
+          <span>✓ Abonnement activé — bienvenue sur Terrain SaaS !</span>
+          <button onClick={() => setPaymentSuccess(false)} className="text-green-500 hover:text-green-700">✕</button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-xl font-medium text-gray-900">Planning</h1>
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setWeekOffset(w => w - 1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            ← Semaine préc.
-          </button>
+          <button onClick={() => setWeekOffset(w => w - 1)} className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">← Semaine préc.</button>
           <span className="text-sm text-gray-500">{weekParam}</span>
-          <button
-            onClick={() => setWeekOffset(w => w + 1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            Semaine suiv. →
-          </button>
-          <button
-            onClick={copyPreviousWeek}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            Copier sem. préc.
-          </button>
-          <button
-            onClick={publishPlanning}
-            className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            Publier le planning
-          </button>
+          <button onClick={() => setWeekOffset(w => w + 1)} className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Semaine suiv. →</button>
+          <button onClick={copyPreviousWeek} className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Copier sem. préc.</button>
+          <button onClick={publishPlanning} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">Publier le planning</button>
         </div>
       </div>
 
       {employees.length === 0 ? (
         <div className="bg-white border border-gray-100 rounded-xl p-12 text-center">
           <p className="text-gray-400 text-sm mb-4">Aucun agent — commencez par en ajouter</p>
-          <a
-            href="/agents"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-          >
-            Ajouter des agents
-          </a>
+          <a href="/agents" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Ajouter des agents</a>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -183,9 +191,7 @@ export default function WeekPlanning() {
                 {dates.map((d, i) => (
                   <th key={i} className="p-3 text-sm font-medium text-gray-500 text-center min-w-28">
                     <div>{DAYS[i]}</div>
-                    <div className="text-xs font-normal text-gray-400">
-                      {d.getDate()}/{d.getMonth() + 1}
-                    </div>
+                    <div className="text-xs font-normal text-gray-400">{d.getDate()}/{d.getMonth() + 1}</div>
                   </th>
                 ))}
               </tr>
@@ -204,23 +210,20 @@ export default function WeekPlanning() {
                             {cellShifts.map(shift => (
                               <div
                                 key={shift.id}
-                                className={`border rounded-lg p-2 text-xs group relative ${
+                                className={`border rounded-lg p-2 text-xs group relative cursor-pointer ${
                                   conflict ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-100'
                                 }`}
+                                onClick={() => openModal(emp.id, date, shift)}
                               >
                                 <div className={`font-medium ${conflict ? 'text-red-800' : 'text-blue-800'}`}>
                                   {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
                                 </div>
                                 {shift.site && (
-                                  <div className={conflict ? 'text-red-600 mt-0.5' : 'text-blue-600 mt-0.5'}>
-                                    {shift.site}
-                                  </div>
+                                  <div className={conflict ? 'text-red-600 mt-0.5' : 'text-blue-600 mt-0.5'}>{shift.site}</div>
                                 )}
-                                {conflict && (
-                                  <div className="text-red-500 text-xs mt-0.5 font-medium">Conflit</div>
-                                )}
+                                {conflict && <div className="text-red-500 text-xs mt-0.5 font-medium">Conflit</div>}
                                 <button
-                                  onClick={() => deleteShift(shift.id)}
+                                  onClick={e => { e.stopPropagation(); deleteShift(shift.id) }}
                                   className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs"
                                 >
                                   ✕
@@ -249,15 +252,11 @@ export default function WeekPlanning() {
       {modal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
-            <h2 className="text-base font-medium mb-4">Nouveau shift</h2>
+            <h2 className="text-base font-medium mb-4">{modal.shiftId ? 'Modifier le shift' : 'Nouveau shift'}</h2>
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Heure de début</label>
-                <select
-                  value={form.startHour}
-                  onChange={e => setForm(f => ({ ...f, startHour: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                >
+                <select value={form.startHour} onChange={e => setForm(f => ({ ...f, startHour: e.target.value }))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
                   {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
                     <option key={h} value={h}>{h}:00</option>
                   ))}
@@ -265,11 +264,7 @@ export default function WeekPlanning() {
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Heure de fin</label>
-                <select
-                  value={form.endHour}
-                  onChange={e => setForm(f => ({ ...f, endHour: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                >
+                <select value={form.endHour} onChange={e => setForm(f => ({ ...f, endHour: e.target.value }))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
                   {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
                     <option key={h} value={h}>{h}:00</option>
                   ))}
@@ -277,28 +272,12 @@ export default function WeekPlanning() {
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Site (optionnel)</label>
-                <input
-                  type="text"
-                  value={form.site}
-                  onChange={e => setForm(f => ({ ...f, site: e.target.value }))}
-                  placeholder="Ex: Site Lyon 1"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                />
+                <input type="text" value={form.site} onChange={e => setForm(f => ({ ...f, site: e.target.value }))} placeholder="Ex: Site Lyon 1" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
               </div>
             </div>
             <div className="flex gap-2 mt-5">
-              <button
-                onClick={() => setModal(null)}
-                className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={createShift}
-                className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Créer
-              </button>
+              <button onClick={() => setModal(null)} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Annuler</button>
+              <button onClick={saveShift} className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">{modal.shiftId ? 'Enregistrer' : 'Créer'}</button>
             </div>
           </div>
         </div>

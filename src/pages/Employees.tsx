@@ -11,7 +11,8 @@ interface Employee {
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(false)
+  const [modal, setModal] = useState<'create' | 'edit' | null>(null)
+  const [selected, setSelected] = useState<Employee | null>(null)
   const [form, setForm] = useState({ name: '', phone: '', contractHours: '151' })
   const [error, setError] = useState('')
 
@@ -23,15 +24,37 @@ export default function Employees() {
 
   useEffect(() => { loadEmployees() }, [])
 
-  const createEmployee = async () => {
+  const openCreate = () => {
+    setForm({ name: '', phone: '', contractHours: '151' })
+    setSelected(null)
+    setModal('create')
+    setError('')
+  }
+
+  const openEdit = (emp: Employee) => {
+    setForm({ name: emp.name, phone: emp.phone || '', contractHours: String(emp.contractHours) })
+    setSelected(emp)
+    setModal('edit')
+    setError('')
+  }
+
+  const saveEmployee = async () => {
     setError('')
     try {
-      await api.post('/employees', {
-        name: form.name,
-        phone: form.phone || undefined,
-        contractHours: parseFloat(form.contractHours),
-      })
-      setModal(false)
+      if (modal === 'create') {
+        await api.post('/employees', {
+          name: form.name,
+          phone: form.phone || undefined,
+          contractHours: parseFloat(form.contractHours),
+        })
+      } else if (modal === 'edit' && selected) {
+        await api.put(`/employees/${selected.id}`, {
+          name: form.name,
+          phone: form.phone || undefined,
+          contractHours: parseFloat(form.contractHours),
+        })
+      }
+      setModal(null)
       setForm({ name: '', phone: '', contractHours: '151' })
       await loadEmployees()
     } catch (err: any) {
@@ -42,12 +65,10 @@ export default function Employees() {
   const deleteEmployee = async (id: string) => {
     if (!confirm('Supprimer cet agent ?')) return
     try {
-        await api.delete(`/employees/${id}`, {
-        headers: { 'Content-Type': 'application/json' },
-        })
-        await loadEmployees()
+      await api.delete(`/employees/${id}`)
+      await loadEmployees()
     } catch (err: any) {
-        alert(err.response?.data?.error || 'Erreur')
+      alert(err.response?.data?.error || 'Impossible de supprimer — cet agent a des shifts ou pointages associés')
     }
   }
 
@@ -58,7 +79,7 @@ export default function Employees() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-medium text-gray-900">Agents</h1>
         <button
-          onClick={() => setModal(true)}
+          onClick={openCreate}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
         >
           + Ajouter un agent
@@ -69,7 +90,7 @@ export default function Employees() {
         <div className="bg-white border border-gray-100 rounded-xl p-12 text-center">
           <p className="text-gray-400 text-sm mb-4">Aucun agent pour le moment</p>
           <button
-            onClick={() => setModal(true)}
+            onClick={openCreate}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
           >
             Ajouter votre premier agent
@@ -92,7 +113,13 @@ export default function Employees() {
                   <td className="p-3 text-sm font-medium text-gray-900">{emp.name}</td>
                   <td className="p-3 text-sm text-gray-500">{emp.phone || '—'}</td>
                   <td className="p-3 text-sm text-center text-gray-500">{emp.contractHours}h</td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 text-right flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => openEdit(emp)}
+                      className="text-xs text-blue-500 hover:text-blue-700"
+                    >
+                      Modifier
+                    </button>
                     <button
                       onClick={() => deleteEmployee(emp.id)}
                       className="text-xs text-red-400 hover:text-red-600"
@@ -110,7 +137,9 @@ export default function Employees() {
       {modal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
-            <h2 className="text-base font-medium mb-4">Nouvel agent</h2>
+            <h2 className="text-base font-medium mb-4">
+              {modal === 'create' ? 'Nouvel agent' : 'Modifier l\'agent'}
+            </h2>
             {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
             <div className="space-y-3">
               <div>
@@ -145,16 +174,16 @@ export default function Employees() {
             </div>
             <div className="flex gap-2 mt-5">
               <button
-                onClick={() => { setModal(false); setError('') }}
+                onClick={() => { setModal(null); setError('') }}
                 className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
               >
                 Annuler
               </button>
               <button
-                onClick={createEmployee}
+                onClick={saveEmployee}
                 className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Ajouter
+                {modal === 'create' ? 'Ajouter' : 'Enregistrer'}
               </button>
             </div>
           </div>

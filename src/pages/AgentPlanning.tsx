@@ -21,6 +21,8 @@ export default function AgentPlanning() {
   const [loading, setLoading] = useState(false)
   const [geoError, setGeoError] = useState('')
   const [success, setSuccess] = useState('')
+  const [absenceModal, setAbsenceModal] = useState(false)
+  const [absenceReason, setAbsenceReason] = useState('')
 
   const loadData = async () => {
     try {
@@ -31,16 +33,11 @@ export default function AgentPlanning() {
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [token])
+  useEffect(() => { loadData() }, [token])
 
   const getLocation = (): Promise<{ lat: number; lng: number } | null> => {
     return new Promise(resolve => {
-      if (!navigator.geolocation) {
-        resolve(null)
-        return
-      }
+      if (!navigator.geolocation) { resolve(null); return }
       navigator.geolocation.getCurrentPosition(
         pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => resolve(null),
@@ -56,11 +53,10 @@ export default function AgentPlanning() {
     try {
       const loc = await getLocation()
       if (!loc) setGeoError('Géolocalisation non disponible — pointage sans position')
-
       await api.post(`/agent/${token}/clockin`, {
         ...(loc && { lat: loc.lat, lng: loc.lng }),
       })
-      setSuccess('Arrivée enregistrée')
+      setSuccess('Arrivée enregistrée ✓')
       await loadData()
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erreur lors du pointage')
@@ -77,12 +73,23 @@ export default function AgentPlanning() {
       await api.post(`/agent/${token}/clockout`, {
         ...(loc && { lat: loc.lat, lng: loc.lng }),
       })
-      setSuccess('Départ enregistré')
+      setSuccess('Départ enregistré ✓')
       await loadData()
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erreur lors du pointage')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const reportAbsence = async () => {
+    try {
+      await api.post(`/agent/${token}/absence`, { reason: absenceReason })
+      setAbsenceModal(false)
+      setAbsenceReason('')
+      setSuccess('Absence signalée à votre responsable ✓')
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Erreur')
     }
   }
 
@@ -106,7 +113,7 @@ export default function AgentPlanning() {
         </h1>
         <p className="text-sm text-gray-500 mb-6">Votre planning de la semaine</p>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
           <div className="text-sm font-medium text-gray-700 mb-3">Pointage</div>
 
           {data.isClockedIn ? (
@@ -137,9 +144,15 @@ export default function AgentPlanning() {
               <button
                 onClick={clockIn}
                 disabled={loading}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                className="w-full py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 mb-2"
               >
                 {loading ? 'Enregistrement...' : 'Pointer mon arrivée'}
+              </button>
+              <button
+                onClick={() => setAbsenceModal(true)}
+                className="w-full py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Signaler une absence
               </button>
             </div>
           )}
@@ -164,15 +177,44 @@ export default function AgentPlanning() {
                   <div className="text-blue-600 font-medium mt-1">
                     {start.getHours()}h00 – {end.getHours()}h00
                   </div>
-                  {shift.site && (
-                    <div className="text-xs text-gray-500 mt-1">{shift.site}</div>
-                  )}
+                  {shift.site && <div className="text-xs text-gray-500 mt-1">{shift.site}</div>}
                 </div>
               )
             })}
           </div>
         )}
       </div>
+
+      {absenceModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
+            <h2 className="text-base font-medium mb-4">Signaler une absence</h2>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Motif (optionnel)</label>
+              <textarea
+                value={absenceReason}
+                onChange={e => setAbsenceReason(e.target.value)}
+                placeholder="Ex: Maladie, urgence familiale..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm h-24 resize-none"
+              />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setAbsenceModal(false)}
+                className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={reportAbsence}
+                className="flex-1 px-4 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              >
+                Signaler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

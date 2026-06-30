@@ -18,6 +18,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: '/live', label: 'Vue live' },
     { href: '/recap', label: 'Récap mensuel' },
     { href: '/upgrade', label: 'Abonnement' },
+    { href: '/profile', label: 'Profil' },
   ]
 
   const current = window.location.pathname

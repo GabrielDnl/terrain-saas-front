@@ -8,6 +8,7 @@ import Recap from './pages/Recap'
 import Upgrade from './pages/Upgrade'
 import Employees from './pages/Employees'
 import Layout from './components/Layout'
+import Profile from './pages/Profile'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -48,6 +49,9 @@ export default function App() {
         } />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
+      <Route path="/profile" element={
+        <PrivateRoute><Layout><Profile /></Layout></PrivateRoute>
+      } />
     </BrowserRouter>
   )
 }
