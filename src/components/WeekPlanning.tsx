@@ -46,18 +46,12 @@ export default function WeekPlanning() {
       api.get('/employees'),
       api.get(`/shifts?startDate=${start.toISOString()}&endDate=${end.toISOString()}`),
     ])
-    const uniqueEmployees = empRes.data.filter(
-      (emp: Employee, index: number, self: Employee[]) =>
-        index === self.findLastIndex((e: Employee) => e.name === emp.name)
-    )
-    setEmployees(uniqueEmployees)
+    setEmployees(empRes.data)
     setShifts(shiftRes.data)
     setLoading(false)
   }
 
-  useEffect(() => {
-    loadData()
-  }, [weekOffset])
+  useEffect(() => { loadData() }, [weekOffset])
 
   const getShiftsForCell = (employeeId: string, date: Date) =>
     shifts.filter(s => {
@@ -161,17 +155,6 @@ export default function WeekPlanning() {
           >
             Copier sem. préc.
           </button>
-          
-          <a href="/live"
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            Vue live
-          </a>
-          <a href="/recap"
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            Récap mensuel
-          </a>
           <button
             onClick={publishPlanning}
             className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -181,77 +164,87 @@ export default function WeekPlanning() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="text-left p-3 text-sm font-medium text-gray-500 w-36">Agent</th>
-              {dates.map((d, i) => (
-                <th key={i} className="p-3 text-sm font-medium text-gray-500 text-center min-w-28">
-                  <div>{DAYS[i]}</div>
-                  <div className="text-xs font-normal text-gray-400">
-                    {d.getDate()}/{d.getMonth() + 1}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map(emp => (
-              <tr key={emp.id} className="border-t border-gray-100">
-                <td className="p-3 text-sm font-medium text-gray-700">{emp.name}</td>
-                {dates.map((date, i) => {
-                  const cellShifts = getShiftsForCell(emp.id, date)
-                  const conflict = hasConflict(emp.id, date)
-                  return (
-                    <td key={i} className="p-1.5 text-center">
-                      {cellShifts.length > 0 ? (
-                        <div className="space-y-1">
-                          {cellShifts.map(shift => (
-                            <div
-                              key={shift.id}
-                              className={`border rounded-lg p-2 text-xs group relative ${
-                                conflict
-                                  ? 'bg-red-50 border-red-200'
-                                  : 'bg-blue-50 border-blue-100'
-                              }`}
-                            >
-                              <div className={`font-medium ${conflict ? 'text-red-800' : 'text-blue-800'}`}>
-                                {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
-                              </div>
-                              {shift.site && (
-                                <div className={conflict ? 'text-red-600 mt-0.5' : 'text-blue-600 mt-0.5'}>
-                                  {shift.site}
-                                </div>
-                              )}
-                              {conflict && (
-                                <div className="text-red-500 text-xs mt-0.5 font-medium">Conflit</div>
-                              )}
-                              <button
-                                onClick={() => deleteShift(shift.id)}
-                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => openModal(emp.id, date)}
-                          className="w-full h-12 rounded-lg border border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-gray-300 hover:text-blue-400 text-lg"
-                        >
-                          +
-                        </button>
-                      )}
-                    </td>
-                  )
-                })}
+      {employees.length === 0 ? (
+        <div className="bg-white border border-gray-100 rounded-xl p-12 text-center">
+          <p className="text-gray-400 text-sm mb-4">Aucun agent — commencez par en ajouter</p>
+          <a
+            href="/agents"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+          >
+            Ajouter des agents
+          </a>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="text-left p-3 text-sm font-medium text-gray-500 w-36">Agent</th>
+                {dates.map((d, i) => (
+                  <th key={i} className="p-3 text-sm font-medium text-gray-500 text-center min-w-28">
+                    <div>{DAYS[i]}</div>
+                    <div className="text-xs font-normal text-gray-400">
+                      {d.getDate()}/{d.getMonth() + 1}
+                    </div>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {employees.map(emp => (
+                <tr key={emp.id} className="border-t border-gray-100">
+                  <td className="p-3 text-sm font-medium text-gray-700">{emp.name}</td>
+                  {dates.map((date, i) => {
+                    const cellShifts = getShiftsForCell(emp.id, date)
+                    const conflict = hasConflict(emp.id, date)
+                    return (
+                      <td key={i} className="p-1.5 text-center">
+                        {cellShifts.length > 0 ? (
+                          <div className="space-y-1">
+                            {cellShifts.map(shift => (
+                              <div
+                                key={shift.id}
+                                className={`border rounded-lg p-2 text-xs group relative ${
+                                  conflict ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-100'
+                                }`}
+                              >
+                                <div className={`font-medium ${conflict ? 'text-red-800' : 'text-blue-800'}`}>
+                                  {new Date(shift.startTime).getHours()}h–{new Date(shift.endTime).getHours()}h
+                                </div>
+                                {shift.site && (
+                                  <div className={conflict ? 'text-red-600 mt-0.5' : 'text-blue-600 mt-0.5'}>
+                                    {shift.site}
+                                  </div>
+                                )}
+                                {conflict && (
+                                  <div className="text-red-500 text-xs mt-0.5 font-medium">Conflit</div>
+                                )}
+                                <button
+                                  onClick={() => deleteShift(shift.id)}
+                                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => openModal(emp.id, date)}
+                            className="w-full h-12 rounded-lg border border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-gray-300 hover:text-blue-400 text-lg"
+                          >
+                            +
+                          </button>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {modal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
