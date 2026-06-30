@@ -5,14 +5,19 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
+    setLoading(true)
+    setError('')
     try {
       const res = await api.post('/auth/login', { email, password })
       localStorage.setItem('token', res.data.token)
       window.location.href = '/planning'
     } catch {
       setError('Identifiants invalides')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -39,11 +44,18 @@ export default function Login() {
           />
           <button
             onClick={handleLogin}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+            disabled={loading}
+            className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
           >
-            Se connecter
+            {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </div>
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Pas encore de compte ?{' '}
+          <a href="/register" className="text-blue-600 hover:underline">
+            Créer un compte
+          </a>
+        </p>
       </div>
     </div>
   )
