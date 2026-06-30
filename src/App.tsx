@@ -7,8 +7,8 @@ import LiveView from './pages/LiveView'
 import Recap from './pages/Recap'
 import Upgrade from './pages/Upgrade'
 import Employees from './pages/Employees'
-import Layout from './components/Layout'
 import Profile from './pages/Profile'
+import Layout from './components/Layout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -23,35 +23,25 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/mon-planning/:token" element={<AgentPlanning />} />
         <Route path="/planning" element={
-          <PrivateRoute>
-            <Layout><WeekPlanning /></Layout>
-          </PrivateRoute>
+          <PrivateRoute><Layout><WeekPlanning /></Layout></PrivateRoute>
         } />
         <Route path="/agents" element={
-          <PrivateRoute>
-            <Layout><Employees /></Layout>
-          </PrivateRoute>
+          <PrivateRoute><Layout><Employees /></Layout></PrivateRoute>
         } />
         <Route path="/live" element={
-          <PrivateRoute>
-            <Layout><LiveView /></Layout>
-          </PrivateRoute>
+          <PrivateRoute><Layout><LiveView /></Layout></PrivateRoute>
         } />
         <Route path="/recap" element={
-          <PrivateRoute>
-            <Layout><Recap /></Layout>
-          </PrivateRoute>
+          <PrivateRoute><Layout><Recap /></Layout></PrivateRoute>
         } />
         <Route path="/upgrade" element={
-          <PrivateRoute>
-            <Layout><Upgrade /></Layout>
-          </PrivateRoute>
+          <PrivateRoute><Layout><Upgrade /></Layout></PrivateRoute>
+        } />
+        <Route path="/profile" element={
+          <PrivateRoute><Layout><Profile /></Layout></PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-      <Route path="/profile" element={
-        <PrivateRoute><Layout><Profile /></Layout></PrivateRoute>
-      } />
     </BrowserRouter>
   )
 }

@@ -12,7 +12,6 @@ export default function Profile() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-    const payload = JSON.parse(atob(token.split('.')[1]))
     api.get(`/auth/me`).then(res => {
       setName(res.data.name)
       setEmail(res.data.email)
@@ -36,7 +35,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="p-6 max-w-lg">
+    <div className="p-6 max-w-lg mx-auto">
       <h1 className="text-xl font-medium text-gray-900 mb-6">Mon profil</h1>
 
       <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
